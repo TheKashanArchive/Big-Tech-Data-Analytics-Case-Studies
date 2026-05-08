@@ -1,20 +1,15 @@
-# Microsoft Platform SQL Case Study
-
-**Skills Demonstrated:** SQL · Joins · Aggregations · Subqueries · Filtering · Grouping · Data Analysis
-
----
-
 # Project Overview
 
-This notebook analyzes a simulated **Microsoft platform dataset** containing users, products, subscriptions, usage logs, and support tickets.
+This notebook analyzes a simulated Microsoft platform dataset containing users, products, subscriptions, usage logs, and support tickets.
 
-The goal of this case study is to demonstrate SQL techniques used in real-world data analysis including:
+The queries progress from basic SQL operations to advanced analytical techniques, demonstrating practical use of SQL for real-world business analysis.
 
-- Data aggregation
-- Business metric calculations
-- Customer behavior analysis
-- Product usage insights
-- Support operations analysis
+The focus is on:
+- user behavior analysis
+- product performance
+- subscription revenue
+- platform engagement
+- support operations
 
 ---
 
@@ -45,250 +40,303 @@ The goal of this case study is to demonstrate SQL techniques used in real-world 
 
 # 1. Total Registered Users
 
-### Question
+## Question
+
 Find the total number of users registered on the Microsoft platform.
 
-### SQL Query
+## SQL Query
+
 ```sql
-SELECT COUNT(*) AS total_users
+SELECT 
+COUNT(*) AS total_users
 FROM users;
 ```
 
-### Answer / Result
+## Answer / Result
+
 Returns the total number of users registered in the platform.
 
-### Insight
-This query provides a quick measure of **platform size and user base growth**, which is a key metric for business performance.
+## Insight
+
+This query uses the **COUNT() aggregation function** to calculate the total number of records in the users table. It provides a high-level business metric that represents overall platform size and user base scale.
 
 ---
 
 # 2. Users by Country
 
-### Question
+## Question
+
 Show the number of users from each country.
 
-### SQL Query
+## SQL Query
+
 ```sql
 SELECT 
-country,
+country AS country,
 COUNT(*) AS user_count
 FROM users
-GROUP BY country;
+GROUP BY country
+ORDER BY user_count DESC;
 ```
 
-### Answer / Result
-Displays the number of users grouped by country.
+## Answer / Result
 
-### Insight
-This helps analyze **geographical distribution of users**, which is useful for regional marketing and expansion planning.
+Returns the number of users grouped by country.
+
+## Insight
+
+This query uses **GROUP BY aggregation** to segment users based on geographic location. The COUNT() function is applied per group to measure distribution across countries, helping with regional analysis.
 
 ---
 
 # 3. Available Microsoft Products
 
-### Question
+## Question
+
 List all Microsoft product names available in the system.
 
-### SQL Query
+## SQL Query
+
 ```sql
 SELECT 
-product_name
-FROM products;
+product_name AS product_name
+FROM products
+GROUP BY product_name;
 ```
 
-### Answer / Result
-Returns the list of all products offered on the platform.
+## Answer / Result
 
-### Insight
-This provides a simple overview of the **product catalog** available to users.
+Returns all products available in the platform.
+
+## Insight
+
+This query uses **GROUP BY on product_name** to ensure unique product listing from the dataset. It demonstrates basic data extraction with deduplication logic.
 
 ---
 
 # 4. Active Subscriptions
 
-### Question
+## Question
+
 Retrieve all active subscriptions with user and product details.
 
-### SQL Query
+## SQL Query
+
 ```sql
 SELECT 
-user_id,
-product_id
+user_id AS user_id,
+product_id AS product_id
 FROM subscriptions
-WHERE end_date IS NULL;
+WHERE end_date IS NULL
+GROUP BY user_id, product_id;
 ```
 
-### Answer / Result
-Returns all subscriptions that are currently active.
+## Answer / Result
 
-### Insight
-Subscriptions with a `NULL end_date` indicate **active or ongoing subscriptions**.
+Returns all currently active subscriptions.
+
+## Insight
+
+This query uses a **WHERE filter condition combined with GROUP BY** to isolate active subscription records where no end date exists, indicating ongoing subscriptions.
 
 ---
 
 # 5. Users Subscribed to Microsoft Office
 
-### Question
+## Question
+
 Find users subscribed to Microsoft Office.
 
-### SQL Query
+## SQL Query
+
 ```sql
 SELECT 
-user_id
+user_id AS user_id
 FROM subscriptions
-WHERE product_id = 1;
+WHERE product_id = 1
+GROUP BY user_id;
 ```
 
-### Answer / Result
-Returns users who are subscribed to the Microsoft Office product.
+## Answer / Result
 
-### Insight
-Filtering by `product_id` allows analysts to identify **users associated with a specific product offering**.
+Returns users subscribed to Microsoft Office.
+
+## Insight
+
+This query applies a **WHERE filter condition** on product_id and uses GROUP BY to aggregate users belonging to a specific product category.
 
 ---
 
 # 6. Total Usage Logs
 
-### Question
-Count total number of usage records logged.
+## Question
 
-### SQL Query
+Count total number of usage records.
+
+## SQL Query
+
 ```sql
 SELECT 
 COUNT(*) AS total_logs
 FROM usage_logs;
 ```
 
-### Answer / Result
-Returns the total number of recorded usage activities.
+## Answer / Result
 
-### Insight
-Usage logs help track **how frequently users interact with Microsoft products**.
+Returns total number of usage events.
+
+## Insight
+
+This query uses **COUNT() aggregation** to measure total system activity captured in the usage_logs table.
 
 ---
 
 # 7. Total Support Tickets
 
-### Question
-Find the total number of support tickets raised.
+## Question
 
-### SQL Query
+Find total number of support tickets raised.
+
+## SQL Query
+
 ```sql
 SELECT 
 COUNT(*) AS total_tickets
 FROM support_tickets;
 ```
 
-### Answer / Result
-Returns the total number of support tickets created by users.
+## Answer / Result
 
-### Insight
-This metric helps monitor **customer support workload and user issues**.
+Returns total number of support tickets.
+
+## Insight
+
+This query uses **COUNT() aggregation** to quantify customer support interactions across the platform.
 
 ---
 
 # 8. Closed Support Tickets
 
-### Question
-List all support tickets that are marked as closed.
+## Question
 
-### SQL Query
+List all support tickets that are closed.
+
+## SQL Query
+
 ```sql
 SELECT 
-ticket_id
+ticket_id AS ticket_id
 FROM support_tickets
-WHERE status = 'Closed';
+WHERE status = 'Closed'
+GROUP BY ticket_id;
 ```
 
-### Answer / Result
-Displays all support tickets that have been resolved and closed.
+## Answer / Result
 
-### Insight
-Closed tickets represent **successfully resolved user issues**.
+Returns all resolved support tickets.
+
+## Insight
+
+This query uses a **WHERE clause filter combined with GROUP BY** to isolate tickets based on resolution status.
 
 ---
 
 # 9. Revenue by Product
 
-### Question
-Calculate total subscription revenue generated by each product.
+## Question
 
-### SQL Query
+Calculate total revenue generated by each product.
+
+## SQL Query
+
 ```sql
 SELECT 
 p.product_name AS product_name,
 SUM(s.price) AS total_revenue
 FROM subscriptions s
-JOIN products p
+INNER JOIN products p
 ON s.product_id = p.product_id
-GROUP BY p.product_name;
+GROUP BY p.product_name
+ORDER BY total_revenue DESC;
 ```
 
-### Answer / Result
-Shows the total revenue generated by each product.
+## Answer / Result
 
-### Insight
-This helps identify **which Microsoft products generate the most subscription income**.
+Returns revenue contribution per product.
+
+## Insight
+
+This query uses an **INNER JOIN to combine subscription and product data**, and **GROUP BY aggregation with SUM()** to calculate revenue per product category.
 
 ---
 
 # 10. Subscribers per Product
 
-### Question
+## Question
+
 Count how many users are subscribed to each product.
 
-### SQL Query
+## SQL Query
+
 ```sql
 SELECT 
 p.product_name AS product_name,
 COUNT(DISTINCT s.user_id) AS subscribers
 FROM subscriptions s
-JOIN products p
+INNER JOIN products p
 ON s.product_id = p.product_id
 GROUP BY p.product_name;
 ```
 
-### Answer / Result
-Displays the number of unique subscribers per product.
+## Answer / Result
 
-### Insight
-Counting distinct users prevents duplicate counting from multiple subscriptions.
+Returns number of unique subscribers per product.
+
+## Insight
+
+This query uses **COUNT(DISTINCT)** along with **INNER JOIN and GROUP BY** to ensure unique user-level subscription counting per product.
 
 ---
 
 # 11. Average Usage per Product
 
-### Question
-Calculate the average usage minutes per product.
+## Question
 
-### SQL Query
+Calculate average usage time per product.
+
+## SQL Query
+
 ```sql
 SELECT 
 p.product_name AS product_name,
 AVG(u.usage_minutes) AS avg_usage_minutes
 FROM usage_logs u
-JOIN products p
+INNER JOIN products p
 ON u.product_id = p.product_id
 GROUP BY p.product_name;
 ```
 
-### Answer / Result
-Shows average usage time for each product.
+## Answer / Result
 
-### Insight
-This metric indicates **which products are most actively used by customers**.
+Returns average usage per product.
+
+## Insight
+
+This query uses **AVG() aggregation with GROUP BY** after joining usage logs with product metadata to measure engagement per product.
 
 ---
 
 # 12. Product with Highest Usage
 
-### Question
-Identify the product with the highest total usage time.
+## Question
 
-### SQL Query
+Find product with highest total usage.
+
+## SQL Query
+
 ```sql
 SELECT 
-product_id,
+product_id AS product_id,
 SUM(usage_minutes) AS total_usage_minutes
 FROM usage_logs
 GROUP BY product_id
@@ -296,65 +344,78 @@ ORDER BY total_usage_minutes DESC
 LIMIT 1;
 ```
 
-### Answer / Result
-Returns the product with the highest accumulated usage time.
+## Answer / Result
 
-### Insight
-Products with high usage often indicate **strong customer engagement and product value**.
+Returns most used product.
+
+## Insight
+
+This query uses **SUM() aggregation with GROUP BY and ORDER BY DESC** to rank products by total usage volume.
 
 ---
 
 # 13. Users with Multiple Usage Records
 
-### Question
-Find users who have more than one usage record.
+## Question
 
-### SQL Query
+Find users with more than one usage record.
+
+## SQL Query
+
 ```sql
 SELECT 
-user_id
+user_id AS user_id
 FROM usage_logs
 GROUP BY user_id
 HAVING COUNT(*) > 1;
 ```
 
-### Answer / Result
-Lists users who have logged multiple usage activities.
+## Answer / Result
 
-### Insight
-These users represent **repeat product engagement**, indicating active users.
+Returns users with repeated activity.
+
+## Insight
+
+This query uses **GROUP BY combined with HAVING clause** to filter aggregated results based on usage frequency per user.
 
 ---
 
 # 14. Users Who Raised Support Tickets
 
-### Question
-List users who have raised at least one support ticket.
+## Question
 
-### SQL Query
+List users who raised support tickets.
+
+## SQL Query
+
 ```sql
-SELECT DISTINCT
-user_id
-FROM support_tickets;
+SELECT 
+user_id AS user_id
+FROM support_tickets
+GROUP BY user_id;
 ```
 
-### Answer / Result
-Returns all users who have contacted customer support.
+## Answer / Result
 
-### Insight
-This helps identify **users who required assistance or experienced issues**.
+Returns users who interacted with support system.
+
+## Insight
+
+This query uses **GROUP BY** to identify unique users present in the support ticket dataset.
 
 ---
 
 # 15. Highest Revenue Product
 
-### Question
-Find the product that generated the highest total subscription revenue.
+## Question
 
-### SQL Query
+Find product with highest total revenue.
+
+## SQL Query
+
 ```sql
 SELECT 
-product_id,
+product_id AS product_id,
 SUM(price) AS total_revenue
 FROM subscriptions
 GROUP BY product_id
@@ -362,52 +423,59 @@ ORDER BY total_revenue DESC
 LIMIT 1;
 ```
 
-### Answer / Result
-Returns the product generating the most subscription revenue.
+## Answer / Result
 
-### Insight
-This query highlights **top-performing products from a revenue perspective**.
+Returns top revenue-generating product.
+
+## Insight
+
+This query uses **SUM() aggregation with GROUP BY and ORDER BY ranking logic** to identify highest revenue contributor.
 
 ---
 
 # 16. Total Usage per User
 
-### Question
-Calculate total usage minutes per user.
+## Question
 
-### SQL Query
+Calculate total usage per user.
+
+## SQL Query
+
 ```sql
 SELECT 
-user_id,
+user_id AS user_id,
 SUM(usage_minutes) AS total_usage_minutes
 FROM usage_logs
 GROUP BY user_id;
 ```
 
-### Answer / Result
-Displays total time each user spent using the platform.
+## Answer / Result
 
-### Insight
-This metric helps identify **highly engaged users**.
+Returns total usage per user.
+
+## Insight
+
+This query uses **SUM() aggregation with GROUP BY** to compute total engagement per user.
 
 ---
 
 # 17. Above-Average Usage Users
 
-### Question
-Find users whose total usage is higher than the average usage across all users.
+## Question
 
-### SQL Query
+Find users whose usage is above platform average.
+
+## SQL Query
+
 ```sql
 SELECT 
-user_id
+user_id AS user_id
 FROM usage_logs
 GROUP BY user_id
 HAVING SUM(usage_minutes) >
 (
 SELECT AVG(total_usage)
-FROM
-(
+FROM (
 SELECT SUM(usage_minutes) AS total_usage
 FROM usage_logs
 GROUP BY user_id
@@ -415,25 +483,29 @@ GROUP BY user_id
 );
 ```
 
-### Answer / Result
-Lists users whose total usage exceeds the average user usage.
+## Answer / Result
 
-### Insight
-This identifies **power users**, which can be important for retention or premium marketing strategies.
+Returns high-usage users.
+
+## Insight
+
+This query uses a **subquery with nested aggregation and HAVING clause** to compare individual user usage against overall platform average.
 
 ---
 
 # 18. Support Ticket Distribution by Product
 
-### Question
-Calculate percentage distribution of support tickets by product.
+## Question
 
-### SQL Query
+Calculate ticket percentage per product.
+
+## SQL Query
+
 ```sql
 SELECT 
-product_id,
+product_id AS product_id,
 ROUND(
-100.0 * COUNT(*) / 
+100.0 * COUNT(*) /
 (SELECT COUNT(*) FROM support_tickets),
 2
 ) AS ticket_percentage
@@ -441,24 +513,28 @@ FROM support_tickets
 GROUP BY product_id;
 ```
 
-### Answer / Result
-Shows what percentage of tickets each product contributes.
+## Answer / Result
 
-### Insight
-Products with higher ticket percentages may indicate **technical issues or complex features requiring support**.
+Returns percentage distribution of support tickets.
+
+## Insight
+
+This query uses **GROUP BY with COUNT() and a scalar subquery** to compute proportional contribution of each product to total support load.
 
 ---
 
 # 19. User Support Ticket Summary
 
-### Question
-Find all users with support tickets showing total and open ticket counts.
+## Question
 
-### SQL Query
+Find users with total and open support tickets.
+
+## SQL Query
+
 ```sql
 SELECT 
-u.user_id,
-u.country,
+u.user_id AS user_id,
+u.country AS country,
 COUNT(st.ticket_id) AS total_tickets,
 SUM(
 CASE 
@@ -467,41 +543,47 @@ ELSE 0
 END
 ) AS open_tickets
 FROM users u
-JOIN support_tickets st
+INNER JOIN support_tickets st
 ON u.user_id = st.user_id
 GROUP BY u.user_id, u.country
 HAVING COUNT(st.ticket_id) > 0
 ORDER BY total_tickets DESC;
 ```
 
-### Answer / Result
-Displays users along with the number of total and open support tickets they have raised.
+## Answer / Result
 
-### Insight
-This helps identify **users experiencing frequent issues or requiring support assistance**.
+Returns ticket activity per user.
+
+## Insight
+
+This query uses **INNER JOIN, GROUP BY, CASE statement, and HAVING clause** to segment user-level support activity and classify ticket statuses.
 
 ---
 
 # 20. Fully Engaged Users
 
-### Question
-Find users who have subscriptions, usage activity, and support tickets.
+## Question
 
-### SQL Query
+Find users who have subscriptions, usage, and support activity.
+
+## SQL Query
+
 ```sql
 SELECT DISTINCT 
-u.user_id
+u.user_id AS user_id
 FROM users u
-JOIN subscriptions s
+INNER JOIN subscriptions s
 ON u.user_id = s.user_id
-JOIN usage_logs ul
+INNER JOIN usage_logs ul
 ON u.user_id = ul.user_id
-JOIN support_tickets st
+INNER JOIN support_tickets st
 ON u.user_id = st.user_id;
 ```
 
-### Answer / Result
-Returns users who appear across subscriptions, usage activity, and support tickets.
+## Answer / Result
 
-### Insight
-These users interact with **multiple aspects of the platform**, making them highly engaged users.
+Returns fully engaged users across all platform activities.
+
+## Insight
+
+This query uses **multiple INNER JOINs across four tables** to identify users present in all engagement layers, representing highly active platform users.
